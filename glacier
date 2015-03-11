@@ -1,0 +1,75 @@
+#!/usr/bin/env python2
+
+import os
+import sys
+import logging
+import argparse
+
+from glacierclient import cli
+
+
+if __name__ == '__main__':
+
+    parser = argparse.ArgumentParser(description='Glacier CLI Utility')
+
+    # Global flags.
+    parser.add_argument('-d', '--debug',
+        action='store_true',
+        help='Enabled debug-level logging.',
+    )
+
+    parser.add_argument('-a', '--access_key',
+        default=os.environ.get('AWS_ACCESS_KEY'),
+        help='Access key to use.',
+    )
+
+    parser.add_argument('-s', '--secret_key',
+        default=os.environ.get('AWS_SECRET_KEY'),
+        help='Secret key to use.',
+    )
+
+    parser.add_argument('-k', '--insecure',
+        action='store_true',
+        help='Do not verify server SSL certificate.',
+    )
+
+    parser.add_argument('region',
+        choices=map(lambda x: str(x.name), cli.boto.glacier.regions()),
+        help='Region to use.',
+    )
+
+    # Sub-commands.
+    subparsers = parser.add_subparsers(help='subcommand help')
+
+    freeze = subparsers.add_parser('freeze', help='Send a file to Glacier.')
+    freeze.add_argument('vault', help='Vault to send frozen file to.')
+    freeze.add_argument('filename', help='File to freeze.')
+    freeze.add_argument('--description',
+        default='',
+        help='Description to add to fozen file.')
+    freeze.set_defaults(func=cli.freeze)
+
+    ls = subparsers.add_parser('ls', help='List vaults or keys in vaults.')
+    ls.add_argument('vaults', metavar='vault', nargs='*', help='Bucket to list.')
+    ls.set_defaults(func=cli.ls)
+
+    create = subparsers.add_parser('create', help='Create a vault.')
+    create.add_argument('vault', help='Vault name.')
+    create.set_defaults(func=cli.create)
+
+    delete = subparsers.add_parser('delete', help='Delete a key or an empty vault.')
+    delete.add_argument('vault', help='Vault name.')
+    delete.add_argument('key', nargs='?', help='Key name.')
+    delete.set_defaults(func=cli.delete)
+
+    args=parser.parse_args()
+
+    logging.basicConfig(
+        level=logging.DEBUG if args.debug else logging.INFO,
+        format='%(asctime)s %(name)-6s %(levelname)-4s %(message)s',
+    )
+
+    try: args.func(**args.__dict__)
+    except Exception as err:
+        logging.exception(err)
+        raise
