@@ -43,7 +43,7 @@ positional arguments:
 optional arguments:
   -h, --help  show this help message and exit
 
-$ ./glacier us-east-1 create mark_test
+$ ./glacier us-east-1 create test
 ```
 
 Listing:
