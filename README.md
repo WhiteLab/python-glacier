@@ -102,5 +102,5 @@ positional arguments:
 optional arguments:
   -h, --help  show this help message and exit
 
-$ ./glacier us-east-1 delete mark_test 3iPTJ3KwJsRpggCDGcZHE9RtETTcjKIxUowoTcLDfdo...
+$ ./glacier us-east-1 delete test 3iPTJ3KwJsRpggCDGcZHE9RtETTcjKIxUowoTcLDfdo...
 ```
